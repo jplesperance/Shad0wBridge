@@ -78,6 +78,7 @@ func targetCommChannel(target Target) {
 
 func communicationHandler(conn net.Conn) {
 	remoteAddr := conn.RemoteAddr().String()
+
 	currentTime := time.Now().Format("01/02/2006 15:04:05")
 	target := Target{conn: conn, address: remoteAddr, connectTime: currentTime}
 	targets = append(targets, target)
