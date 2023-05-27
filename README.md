@@ -6,7 +6,7 @@
     <br/>
 </p>
 
-![Downloads](https://img.shields.io/github/downloads/jplesperance/Shad0wBridge/total) ![Contributors](https://img.shields.io/github/contributors/jplesperance/Shad0wBridge?color=dark-green) ![Stargazers](https://img.shields.io/github/stars/jplesperance/Shad0wBridge?style=social) ![Issues](https://img.shields.io/github/issues/jplesperance/Shad0wBridge) ![License](https://img.shields.io/github/license/jplesperance/Shad0wBridge) 
+![Downloads](https://img.shields.io/github/downloads/jplesperance/Shad0wBridge/total) ![Contributors](https://img.shields.io/github/contributors/jplesperance/shad0wbridge?color=dark-green) ![Stargazers](https://img.shields.io/github/stars/jplesperance/shad0wbridge?style=social) ![Issues](https://img.shields.io/github/issues/jplesperance/Shad0wBridge) ![License](https://img.shields.io/github/license/jplesperance/Shad0wBridge) 
 
 ## Table Of Contents
 
@@ -14,10 +14,6 @@
 * [Getting Started](#getting-started)
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
-* [Roadmap](#roadmap)
-* [Contributing](#contributing)
-* [License](#license)
-* [Authors](#authors)
 * [Acknowledgements](#acknowledgements)
 
 ## About The Project
