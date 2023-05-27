@@ -23,6 +23,8 @@ def session_handler(sock, target_ip, target_port):
             print('[-] The server has terminated the session.')
             sock.close()
             break
+        elif message == 'persist':
+            pass
         elif message.split(" ")[0] == 'cd':
             try:
                 directory = str(message.split(" ")[1])
