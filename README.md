@@ -42,9 +42,12 @@ Implants will be available for multiple operating systems and will be dynamicall
 - [ ] Basic Command & Control functionality
   - [ ] CMD Commands
   - [ ] SH Commands
-- [ ] Basic Persistence
-  - [ ] Linux Cronjob
-  - [ ] Windows Registry Autorun
+- [X] Basic Persistence
+  - [X] Linux Cronjob
+  - [X] Windows Registry Autorun
+- [ ] Encoded payloads
+- [ ] Encrypted payloads
+- [ ] Staged payloads
 
 ## Getting Started
 
