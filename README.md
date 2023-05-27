@@ -6,7 +6,7 @@
     <br/>
 </p>
 
-![Downloads](https://img.shields.io/github/downloads/jplesperance/Shad0wBridge/total) ![Contributors](https://img.shields.io/github/contributors/jplesperance/Shad0wBridge?color=dark-green) ![Stargazers](https://img.shields.io/github/stars/Lavender-exe/Hades-C2?style=social) ![Issues](https://img.shields.io/github/issues/Lavender-exe/Hades-C2) ![License](https://img.shields.io/github/license/Lavender-exe/Hades-C2) 
+![Downloads](https://img.shields.io/github/downloads/jplesperance/Shad0wBridge/total) ![Contributors](https://img.shields.io/github/contributors/jplesperance/Shad0wBridge?color=dark-green) ![Stargazers](https://img.shields.io/github/stars/jplesperance/Shad0wBridge?style=social) ![Issues](https://img.shields.io/github/issues/jplesperance/Shad0wBridge) ![License](https://img.shields.io/github/license/jplesperance/Shad0wBridge) 
 
 ## Table Of Contents
 
