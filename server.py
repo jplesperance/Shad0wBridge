@@ -9,7 +9,9 @@ from datetime import datetime
 import random
 import string
 import subprocess
-
+import base64
+from rich.console import Console
+from rich.table import Table
 
 
 
@@ -85,6 +87,10 @@ def exeplant():
         print(f'[+] {exe_file} saved to current directory.')
     else:
         print('[-] Some error occured during generation.')
+
+
+def powershell_cradle():
+    return
 
 def listener_handler():
     sock.bind((host_ip, int(host_port)))
@@ -236,13 +242,26 @@ if __name__ == '__main__':
             if command.split(" ")[0] == 'sessions':
                 session_counter = 0
                 if command.split(" ")[1] == '-l':
-                    myTable = PrettyTable()
-                    myTable.field_names = ['Session', 'Status', 'Username', 'Admin', 'Target', 'Operating System', 'Check-In Time']
-                    myTable.padding_width = 3
+                    table = Table(title="Sessions")
+                    table.add_column("Session", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("Status", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("Username", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("Admin", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("Target", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("OS", justify="center", style="cyan", no_wrap=True)
+                    table.add_column("Status", justify="center", style="cyan", no_wrap=True)
+                    #myTable = PrettyTable()
+                    #myTable.field_names = ['Session', 'Status', 'Username', 'Admin', 'Target', 'Operating System', 'Check-In Time']
+                    #myTable.padding_width = 3
                     for target in targets:
-                        myTable.add_row([session_counter, target[7], target[3], target[4], target[1], target[5], target[2]])
+                        if target[7] == 'Active':
+                            table.add_row(str(session_counter), target[7], target[3], target[4], target[1], target[5], target[2], style='green')
+                        else:
+                            table.add_row(str(session_counter), target[7], target[3], target[4], target[1], target[5], target[2], style='red')
                         session_counter += 1
-                    print(myTable)
+                    #print(myTable)
+                    console = Console()
+                    console.print(table)
                 if command.split(" ")[1] == '-i':
                     try:
                         num = int(command.split(" ")[2])

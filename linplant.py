@@ -67,6 +67,7 @@ def inbound(sock):
 def outbound(sock, message):
     response = str(message).encode()
     sock.send(response)
+    return
 
 
 def main():
