@@ -30,8 +30,8 @@ Implants will be available for multiple operating systems and will be dynamicall
 - [ ] Windows Implant
   - [X] Python Implant
   - [ ] Golang Implant
-  - [ ] Executable Implant
-  - [ ] Powershell Cradle
+  - [X] Executable Implant
+  - [X] Powershell Cradle
 - [ ] Linux Implant
   - [X] Python Implant 
   - [ ] Golang Implant
@@ -41,7 +41,7 @@ Implants will be available for multiple operating systems and will be dynamicall
 - [X] Basic Persistence
   - [X] Linux Cronjob
   - [X] Windows Registry Autorun
-- [ ] Encoded payloads
+- [X] Encoded payloads
 - [ ] Encrypted payloads
 - [ ] Staged payloads
 
