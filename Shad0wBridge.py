@@ -17,8 +17,8 @@ def winplant():
     random_name = (''.join(random.choices(string.ascii_lowercase, k=6)))
     file_name = f'{random_name}.py'
     check_cwd = os.getcwd()
-    if os.path.exists(f'{check_cwd}/impant-templates/winplant.py'):
-        shutil.copy('impant-template/winplant.py', 'payloads/'+file_name)
+    if os.path.exists(f'{check_cwd}/implant-templates/winplant.py'):
+        shutil.copy('implant-templates/winplant.py', 'payloads/'+file_name)
     else:
         print('[-] winplant.py file not found.')
     with open('payloads/'+file_name) as f:
