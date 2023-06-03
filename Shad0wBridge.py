@@ -313,6 +313,16 @@ def handle_sessions(command, targets):
         display_sessions(targets)
     elif command.split(" ")[1] == '-i':
         handle_interactive_session(command, targets)
+    elif command.split(" ")[1] == '-k' or command.split(" ")[1] == '--kill':
+        handle_session_termination(command, targets)
+
+
+def handle_session_termination(command, targets):
+    if len(command.split(" ")) < 3:
+        print('[-] A valid and active session id must be passed with --kill command')
+        return
+    command = "kill " + command.split(" ")[2]
+    handle_kill(command, targets)
 
 
 def handle_kill(command, targets):
